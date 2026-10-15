@@ -35,6 +35,7 @@ MODELS = [m.strip() for m in os.environ.get("GEMINI_MODELS", "gemini-flash-lates
 MAX_HISTORY_TURNS = 20      # patient messages kept in what's sent to Gemini; older ones are dropped
 TIMEOUT_MS = 30_000
 RETRIES_PER_MODEL = 2
+QUOTA_COOLDOWN_S = 60       # how long to skip a model that hit its quota, if Google doesn't say
 MAX_TOOL_ROUNDS = 5
 
 PRACTICE = {
@@ -222,6 +223,18 @@ class Conversation:
     lock: threading.Lock = field(default_factory=threading.Lock)
 
 
+def is_quota_error(e) -> bool:
+    """429 RESOURCE_EXHAUSTED: the API key used up its requests for this model (free tier: per day)."""
+    text = str(e)
+    return getattr(e, "code", None) == 429 or "RESOURCE_EXHAUSTED" in text or text.startswith("429")
+
+
+def quota_retry_seconds(e) -> float:
+    """Gemini says when to retry, e.g. 'retryDelay': '68502s'. Fall back to a short cooldown."""
+    m = re.search(r"retryDelay['\"]?:\s*['\"](\d+(?:\.\d+)?)s", str(e))
+    return float(m.group(1)) if m else QUOTA_COOLDOWN_S
+
+
 # ---------- the bot ----------
 
 class Bot:
@@ -230,6 +243,7 @@ class Bot:
         self.client = client or genai.Client(http_options=types.HttpOptions(timeout=TIMEOUT_MS))
         self.models = models
         self.db_lock = db_lock or threading.Lock()
+        self.quota_out_until = {}   # model -> time.monotonic() when it may be tried again
 
     def new_conversation(self, conversation_id=None, fixed_now=None) -> Conversation:
         cid = conversation_id or str(uuid.uuid4())
@@ -286,11 +300,17 @@ class Bot:
 
     def _generate(self, history, config):
         for model in self.models:
+            if time.monotonic() < self.quota_out_until.get(model, 0):
+                continue                                    # out of quota: go straight to the next model
             for attempt in range(RETRIES_PER_MODEL):
                 try:
                     return self.client.models.generate_content(model=model, contents=history, config=config)
-                except Exception as e:  # overloaded, timeout, network
+                except Exception as e:  # overloaded, timeout, network, quota
                     log.warning("Gemini %s attempt %d failed: %s", model, attempt + 1, e)
+                    if is_quota_error(e):
+                        # Retrying won't help until the quota resets, so skip this model until then.
+                        self.quota_out_until[model] = time.monotonic() + quota_retry_seconds(e)
+                        break
                     time.sleep(1 + attempt)
         return None
 

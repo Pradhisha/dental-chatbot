@@ -141,6 +141,18 @@ def test_falls_back_to_second_model(con):
     assert client.models_used == ["gemini-flash-latest", "gemini-flash-latest", "gemini-flash-lite-latest"]
 
 
+QUOTA = RuntimeError("429 RESOURCE_EXHAUSTED. {'error': {'details': [{'retryDelay': '68502s'}]}}")
+
+
+def test_quota_error_skips_straight_to_next_model_and_remembers(con):
+    b, conv, client = make(con, QUOTA, say("Hi!"), say("Hello again."))
+    assert b.reply(conv, "hello")["reply"] == "Hi!"
+    assert client.models_used == ["gemini-flash-latest", "gemini-flash-lite-latest"]   # no retry on 429
+    assert b.reply(conv, "hi")["reply"] == "Hello again."
+    assert client.models_used[-1] == "gemini-flash-lite-latest"                     # exhausted model skipped
+    assert botmod.quota_retry_seconds(QUOTA) == 68502
+
+
 def test_all_models_down_gives_friendly_reply_and_clean_history(con):
     b, conv, _ = make(con, *[RuntimeError("down")] * 4)
     out = b.reply(conv, "hello")
