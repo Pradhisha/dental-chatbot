@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff sign-in · Bright Smile Dental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f2f5f6; --paper:#fff; --ink:#132029; --ink-2:#4a5a64; --ink-3:#6e7e87;
+  --line:#d9e1e4; --pine:#0d6b67; --pine-soft:#e2f1ef; --pine-ink:#fff; --danger:#b4232c; --danger-soft:#fbe9ea;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f1619; --paper:#172126; --ink:#e6eef0; --ink-2:#a9b8be; --ink-3:#8797a0;
+  --line:#2b3a40; --pine:#3fb3a9; --pine-soft:#173a38; --pine-ink:#08201e; --danger:#f0727a; --danger-soft:#3a1d20; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;display:grid;place-items:center;padding:24px 16px}
+:focus-visible{outline:3px solid var(--pine);outline-offset:2px}
+main{width:100%;max-width:400px;display:flex;flex-direction:column;gap:20px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:40px;height:40px;border-radius:50%;background:var(--pine);color:var(--pine-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:18px}
+.brand b{font-family:var(--f-display);font-size:18px;display:block}
+.brand small{color:var(--ink-3);font-size:13px}
+form{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--f-display);font-size:24px;margin:0}
+label{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:14px}
+input{font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper);color:var(--ink)}
+input:focus{border-color:var(--pine);outline:none}
+button{font:inherit;font-weight:600;border:0;background:var(--pine);color:var(--pine-ink);border-radius:8px;padding:11px;cursor:pointer}
+button:disabled{opacity:.6;cursor:default}
+.error{background:var(--danger-soft);color:var(--danger);border-radius:8px;padding:10px 12px;font-size:14px}
+.demo{font-size:13px;color:var(--ink-2);background:var(--pine-soft);border-radius:10px;padding:12px 14px}
+.demo code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.back{font-size:14px;color:var(--ink-2)}
+.back a{color:var(--pine)}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><span class="logo" aria-hidden="true">B</span><div><b>Bright Smile Dental</b><small>Front desk</small></div></div>
+  <form id="form" novalidate>
+    <h1>Staff sign-in</h1>
+    <div class="error" id="error" role="alert" hidden></div>
+    <label for="username">Username<input id="username" name="username" autocomplete="username" required autofocus></label>
+    <label for="password">Password<input id="password" name="password" type="password" autocomplete="current-password" required></label>
+    <button id="submit" type="submit">Sign in</button>
+  </form>
+  <div class="demo">
+    <b>Demo accounts</b><br>
+    Front desk: <code>frontdesk</code> · Office manager: <code>manager</code><br>
+    Password for both: <code>SmileDemo2026</code>
+  </div>
+  <p class="back">Patient? <a href="/">Go to the online assistant</a></p>
+</main>
+<script>
+const form = document.getElementById("form"), error = document.getElementById("error"), submit = document.getElementById("submit");
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const username = form.username.value.trim(), password = form.password.value;
+  if (!username || !password) { showError("Enter your username and password."); return; }
+  submit.disabled = true; submit.textContent = "Signing in…"; error.hidden = true;
+  try {
+    const res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }) });
+    if (res.ok) { location.href = "/staff"; return; }
+    const data = await res.json().catch(() => ({}));
+    showError(data.detail || "Couldn't sign in. Try again.");
+    form.password.value = ""; form.password.focus();
+  } catch {
+    showError("Couldn't reach the server. Is it running?");
+  } finally { submit.disabled = false; submit.textContent = "Sign in"; }
+});
+function showError(msg) { error.textContent = msg; error.hidden = false; }
+</script>
+</body>
+</html>

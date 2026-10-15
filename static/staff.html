@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Front desk · Bright Smile Dental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f2f5f6; --paper:#fff; --ink:#132029; --ink-2:#4a5a64; --ink-3:#6e7e87;
+  --line:#d9e1e4; --line-2:#e8eef0; --pine:#0d6b67; --pine-soft:#e2f1ef; --pine-ink:#fff;
+  --danger:#b4232c; --danger-soft:#fbe9ea; --warn:#9a5b00; --warn-soft:#fdf1dc; --ok:#1d7a3e; --ok-soft:#e3f3e8;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f1619; --paper:#172126; --ink:#e6eef0; --ink-2:#a9b8be; --ink-3:#8797a0;
+  --line:#2b3a40; --line-2:#223035; --pine:#3fb3a9; --pine-soft:#173a38; --pine-ink:#08201e;
+  --danger:#f0727a; --danger-soft:#3a1d20; --warn:#e7b05a; --warn-soft:#352a17; --ok:#6fcf8f; --ok-soft:#17311f; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;padding:24px 16px}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--pine);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:50%;background:var(--pine);color:var(--pine-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+h1{font-family:var(--f-display);font-size:22px;margin:0}
+.updated{font-size:13px;color:var(--ink-3)}
+.who{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi b{font-family:var(--f-display);font-size:28px;font-variant-numeric:tabular-nums;display:block;line-height:1.1}
+.kpi span{font-size:13px;color:var(--ink-3)}
+.kpi.alarm{border-color:var(--danger);background:var(--danger-soft)}
+.kpi.alarm b{color:var(--danger)}
+section{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+section h2{margin:0;padding:12px 16px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);border-bottom:1px solid var(--line-2)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+td,th{padding:10px 16px;text-align:left;border-bottom:1px solid var(--line-2);vertical-align:top}
+th{font-size:12px;color:var(--ink-3);font-weight:600}
+tr:last-child td{border-bottom:0}
+tr.seen td{color:var(--ink-3)}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.pill.emergency{background:var(--danger-soft);color:var(--danger)}
+.pill.escalation{background:var(--warn-soft);color:var(--warn)}
+.pill.callback{background:var(--pine-soft);color:var(--pine)}
+.pill.seen{background:var(--ok-soft);color:var(--ok)}
+.pill.type{background:var(--line-2);color:var(--ink-2)}
+.flag{color:var(--warn);font-size:13px;font-weight:600;display:block}
+.muted{color:var(--ink-3);font-size:13px}
+.ack{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.ack:hover{border-color:var(--pine)}
+.empty{padding:16px;color:var(--ink-3)}
+.two{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:18px}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.fb{padding:12px 16px;border-bottom:1px solid var(--line-2);display:flex;gap:10px}
+.fb:last-child{border-bottom:0}
+.when{font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="logo" aria-hidden="true">B</span><h1>Front desk</h1></div>
+    <div class="who"><span class="updated" id="updated" aria-live="polite">Loading…</span><span id="user"></span><button class="ack" id="signout" type="button">Sign out</button></div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section aria-labelledby="h-alerts">
+    <h2 id="h-alerts">Needs attention</h2>
+    <div class="scroll"><table><thead><tr><th>Type</th><th>Patient</th><th>Summary</th><th>Received</th><th></th></tr></thead><tbody id="alerts"></tbody></table></div>
+  </section>
+
+  <div class="two">
+    <section aria-labelledby="h-up">
+      <h2 id="h-up">Next 7 days</h2>
+      <div class="scroll"><table><thead><tr><th>When</th><th>Patient</th><th>Visit</th><th>Insurance</th></tr></thead><tbody id="upcoming"></tbody></table></div>
+    </section>
+    <section aria-labelledby="h-fb">
+      <h2 id="h-fb">Recent feedback</h2>
+      <div id="feedback"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtSlot = iso => new Date(iso).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const ago = utc => {
+  const mins = Math.round((Date.now() - new Date(utc.replace(" ", "T") + "Z")) / 60000);
+  return mins < 1 ? "just now" : mins < 60 ? `${mins} min ago` : mins < 1440 ? `${Math.round(mins / 60)} h ago` : `${Math.round(mins / 1440)} d ago`;
+};
+const fmtPhone = p => p && p.length === 10 ? `(${p.slice(0, 3)}) ${p.slice(3, 6)}-${p.slice(6)}` : (p || "");
+
+async function load() {
+  try {
+    const res = await fetch("/api/staff");
+    if (res.status === 401) { location.href = "/login"; return; }
+    if (!res.ok) throw new Error(res.status);
+    render(await res.json());
+    $("#updated").textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }) + " · refreshes every 10 s";
+  } catch {
+    $("#updated").textContent = "Couldn't load. Is the server running? Retrying…";
+  }
+}
+
+function render(d) {
+  $("#user").textContent = `${d.user.full_name} · ${d.user.role === "admin" ? "Office manager" : "Front desk"}`;
+  const k = d.kpis;
+  $("#kpis").innerHTML = `
+    <div class="kpi ${k.open_emergencies ? "alarm" : ""}"><b>${k.open_emergencies}</b><span>Open emergencies</span></div>
+    <div class="kpi"><b>${k.open_alerts}</b><span>Alerts not yet seen</span></div>
+    <div class="kpi"><b>${k.upcoming_7_days}</b><span>Visits in the next 7 days</span></div>
+    <div class="kpi"><b>${k.thumbs_up_pct == null ? "–" : k.thumbs_up_pct + "%"}</b><span>Thumbs up (${k.ratings} rated)</span></div>`;
+
+  $("#alerts").innerHTML = d.alerts.length ? d.alerts.map(a => `
+    <tr class="${a.acknowledged_at ? "seen" : ""}">
+      <td><span class="pill ${a.acknowledged_at ? "seen" : a.kind}">${a.acknowledged_at ? "Seen" : esc(a.kind)}</span>${a.acknowledged_by ? `<span class="muted" style="display:block">by ${esc(a.acknowledged_by)}</span>` : ""}</td>
+      <td>${a.full_name ? esc(a.full_name) + `<span class="muted" style="display:block">${esc(fmtPhone(a.phone))}</span>` : '<span class="muted">Not verified</span>'}</td>
+      <td>${esc(a.summary)}</td>
+      <td class="when">${ago(a.created_at)}</td>
+      <td>${a.acknowledged_at ? "" : `<button class="ack" type="button" data-id="${a.id}">Mark seen</button>`}</td>
+    </tr>`).join("") : `<tr><td colspan="5" class="empty">Nothing needs attention.</td></tr>`;
+
+  $("#upcoming").innerHTML = d.upcoming.length ? d.upcoming.map(u => `
+    <tr>
+      <td class="when">${fmtSlot(u.starts_at)}</td>
+      <td>${esc(u.full_name)}${u.medical_notes ? `<span class="flag">⚠ ${esc(u.medical_notes)}</span>` : ""}${u.booked_by ? `<span class="muted" style="display:block">Booked by ${esc(u.booked_by)}</span>` : ""}</td>
+      <td><span class="pill ${u.type === "emergency" ? "emergency" : "type"}">${esc(u.type)}</span>${u.emergency_summary ? `<span class="muted" style="display:block">${esc(u.emergency_summary)}</span>` : ""}</td>
+      <td>${u.insurance_name ? esc(u.insurance_name) : '<span class="muted">Self-pay</span>'}</td>
+    </tr>`).join("") : `<tr><td colspan="4" class="empty">No visits booked in the next 7 days.</td></tr>`;
+
+  $("#feedback").innerHTML = d.feedback.length ? d.feedback.map(f => `
+    <div class="fb"><span aria-label="${f.rating > 0 ? "Helpful" : "Not helpful"}">${f.rating > 0 ? "👍" : "👎"}</span>
+      <div>${f.feedback ? esc(f.feedback) : '<span class="muted">No comment</span>'}<span class="muted" style="display:block">${ago(f.created_at)}</span></div></div>`).join("")
+    : `<div class="empty">No ratings yet.</div>`;
+}
+
+$("#alerts").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-id]"); if (!b) return;
+  b.disabled = true;
+  await fetch(`/api/staff/alerts/${b.dataset.id}/ack`, { method: "POST" });
+  load();
+});
+
+$("#signout").addEventListener("click", async () => {
+  await fetch("/api/logout", { method: "POST" }).catch(() => {});
+  location.href = "/login";
+});
+
+load();
+setInterval(load, 10000);
+</script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bright Smile Dental · Online assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f2f5f6; --paper:#fff; --ink:#132029; --ink-2:#4a5a64; --ink-3:#6e7e87;
+  --line:#d9e1e4; --line-2:#e8eef0; --pine:#0d6b67; --pine-soft:#e2f1ef; --pine-ink:#fff;
+  --bubble:#eef3f4; --danger:#b4232c; --danger-soft:#fbe9ea; --ok:#1d7a3e;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --size:16px;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f1619; --paper:#172126; --ink:#e6eef0; --ink-2:#a9b8be; --ink-3:#8797a0;
+  --line:#2b3a40; --line-2:#223035; --pine:#3fb3a9; --pine-soft:#173a38; --pine-ink:#08201e;
+  --bubble:#203038; --danger:#f0727a; --danger-soft:#3a1d20; --ok:#6fcf8f; color-scheme:dark}}
+:root.large{--size:19px}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--size);line-height:1.45}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--pine);outline-offset:2px}
+.app{height:100%;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);background:var(--paper);border-inline:1px solid var(--line)}
+header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:50%;background:var(--pine);color:var(--pine-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+.brand b{font-family:var(--f-display);font-size:1.1em;display:block}
+.brand small{color:var(--ink-3);font-size:.8em}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:5px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.85em;color:var(--ink-2)}
+.ghost{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
+.ghost[aria-pressed="true"]{border-color:var(--pine);color:var(--pine)}
+
+.chat{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line-2)}
+#thread{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:85%;padding:10px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere}
+.bot{align-self:flex-start;background:var(--bubble);border-bottom-left-radius:4px}
+.me{align-self:flex-end;background:var(--pine);color:var(--pine-ink);border-bottom-right-radius:4px}
+.error{align-self:center;color:var(--danger);font-size:.9em}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--pine);color:var(--pine);background:transparent;border-radius:999px;padding:7px 14px;cursor:pointer}
+.chip:hover{background:var(--pine-soft)}
+.chip.urgent{border-color:var(--danger);color:var(--danger)}
+.chip:disabled,.t:disabled,.btn:disabled{opacity:.5;cursor:default}
+.typing{align-self:flex-start;background:var(--bubble);padding:12px 14px;border-radius:16px;display:flex;gap:4px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-3);display:block;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.typing i{animation:none}}
+
+.card{align-self:stretch;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;max-width:520px}
+.card h3{margin:0;font-size:.85em;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.day{display:flex;flex-direction:column;gap:6px}
+.day small{font-weight:600;font-size:.85em;text-align:center;color:var(--ink-2)}
+.t{border:1.5px solid var(--pine);color:var(--pine);background:transparent;border-radius:8px;padding:7px 4px;cursor:pointer;font-variant-numeric:tabular-nums}
+.t:hover,.t.sel{background:var(--pine);color:var(--pine-ink)}
+.member{display:flex;align-items:center;gap:10px;padding:6px 0}
+.member input{width:20px;height:20px;accent-color:var(--pine)}
+.member em{font-style:normal;color:var(--ink-3);font-size:.9em}
+.btn{border:1.5px solid var(--pine);background:var(--pine);color:var(--pine-ink);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;align-self:flex-start}
+.booked li{margin:2px 0}
+.booked ul{margin:0;padding-left:20px}
+.alertcard{border-color:var(--danger);background:var(--danger-soft);color:var(--danger)}
+.alertcard b{display:block}
+
+form{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+#input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:999px;padding:10px 16px;font:inherit;background:var(--paper);color:var(--ink)}
+#input:focus{border-color:var(--pine);outline:none}
+#send{border:0;background:var(--pine);color:var(--pine-ink);border-radius:999px;padding:0 18px;font-weight:600;cursor:pointer}
+
+aside{background:var(--bg);padding:18px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;min-height:0}
+aside h2{font-family:var(--f-display);font-size:1.15em;margin:0}
+.step{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
+.tick{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.8em;font-weight:600;border:1.5px solid var(--line);color:var(--ink-3)}
+.tick.done{background:var(--pine);border-color:var(--pine);color:var(--pine-ink)}
+.tick.alarm{background:var(--danger);border-color:var(--danger);color:#fff}
+.step b{display:block}
+.step span{color:var(--ink-2);font-size:.92em;white-space:pre-line}
+.step.pending b{color:var(--ink-3)}
+.facts{font-size:.85em;color:var(--ink-2);border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.rate{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px;font-size:.9em}
+.rate .row{display:flex;gap:8px}
+.rate textarea{font:inherit;font-size:.95em;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--paper);color:var(--ink);resize:vertical}
+
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;height:auto;min-height:100%}
+  .chat{min-height:70vh;border-right:0}
+  aside{border-top:1px solid var(--line)}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><span class="logo" aria-hidden="true">B</span><div><b>Bright Smile Dental</b><small><span class="dot"></span>Assistant available 24/7 · Office open Mon–Sat 8am–6pm</small></div></div>
+    <div class="tools">
+      <span>Prefer to talk? (214) 555-0100</span>
+      <button class="ghost" id="bigtext" type="button" aria-pressed="false">Larger text</button>
+      <button class="ghost" id="newchat" type="button">New chat</button>
+    </div>
+  </header>
+
+  <main class="chat">
+    <div id="thread" role="log" aria-live="polite" aria-label="Conversation"></div>
+    <form id="form" autocomplete="off">
+      <label for="input" class="sr">Your message</label>
+      <input id="input" placeholder="Type your message…" maxlength="2000">
+      <button id="send" type="submit">Send</button>
+    </form>
+  </main>
+
+  <aside aria-label="Your booking">
+    <h2>Your booking</h2>
+    <div id="steps"></div>
+    <div class="facts">
+      <span>We accept all major dental insurance.</span>
+      <span>No insurance? Ask about self-pay, our membership plan or financing.</span>
+      <span>We never ask for medical history in this chat.</span>
+    </div>
+    <div class="rate" id="rate">
+      <span>How was this chat?</span>
+      <div class="row"><button class="ghost" type="button" data-rating="1" aria-label="Helpful">👍 Helpful</button><button class="ghost" type="button" data-rating="-1" aria-label="Not helpful">👎 Not helpful</button></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const thread = $("#thread"), input = $("#input"), form = $("#form");
+let busy = false;
+
+// A fresh conversation on every page load; the server keeps its state by this id.
+function newId() { return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2); }
+let conversationId = newId();
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") node.className = v; else if (k.startsWith("on")) node.addEventListener(k.slice(2), v); else node.setAttribute(k, v);
+  }
+  for (const c of children.flat()) if (c != null) node.append(c);
+  return node;
+}
+function scrollDown() { thread.scrollTop = thread.scrollHeight; }
+function add(node) { thread.append(node); scrollDown(); return node; }
+function disableOld() { thread.querySelectorAll(".chips button, .card button, .card input").forEach(b => b.disabled = true); }
+
+function greet() {
+  thread.innerHTML = "";
+  add(el("div", { class: "msg bot" }, "Hi! I can book, change or cancel a visit, or answer questions about hours and insurance. What can I help with?"));
+  add(el("div", { class: "chips" },
+    el("button", { class: "chip", type: "button", onclick: () => send("I'd like to book a visit") }, "Book a visit"),
+    el("button", { class: "chip", type: "button", onclick: () => send("I need to change my appointment") }, "Change my appointment"),
+    el("button", { class: "chip urgent", type: "button", onclick: () => send("I have a dental emergency") }, "I have a dental emergency")));
+  renderSummary({ patients: [], done: [], staff_alerted: false });
+}
+
+async function send(text) {
+  text = text.trim();
+  if (!text || busy) return;
+  busy = true; disableOld();
+  add(el("div", { class: "msg me" }, text));
+  const typing = add(el("div", { class: "typing", "aria-label": "Assistant is typing" }, el("i"), el("i"), el("i")));
+  try {
+    const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conversation_id: conversationId, message: text }) });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    typing.remove();
+    add(el("div", { class: "msg bot" }, data.reply));
+    data.cards.forEach(c => { const n = renderCard(c); if (n) add(n); });
+    if (data.choices.length) add(el("div", { class: "chips" }, data.choices.map(c => el("button", { class: "chip", type: "button", onclick: () => send(c) }, c))));
+    renderSummary(data.summary);
+  } catch (e) {
+    typing.remove();
+    add(el("div", { class: "error", role: "alert" }, "Couldn't reach the assistant. Check your connection and try again, or call (214) 555-0100."));
+  } finally { busy = false; input.focus(); }
+}
+
+function groupByDay(options) {
+  const days = new Map();
+  for (const o of options) {
+    const [dayLabel, time] = o.label.split(", ");
+    if (!days.has(dayLabel)) days.set(dayLabel, []);
+    days.get(dayLabel).push({ ...o, time });
+  }
+  return days;
+}
+
+function renderCard(card) {
+  if (card.kind === "slots") {
+    const days = groupByDay(card.options);
+    const word = card.consecutive > 1 ? ` (${card.consecutive} back-to-back from)` : "";
+    return el("div", { class: "card" }, el("h3", {}, card.title + word),
+      el("div", { class: "days" }, [...days].map(([day, opts]) => el("div", { class: "day" }, el("small", {}, day),
+        opts.map(o => el("button", { class: "t", type: "button", "aria-label": o.label,
+          onclick: (ev) => { ev.target.classList.add("sel"); send(card.consecutive > 1 ? `The back-to-back times starting ${o.label}, please` : `${o.label}, please`); } }, o.time))))));
+  }
+  if (card.kind === "family") {
+    const boxes = card.members.map((m, i) => {
+      const id = `fam-${Date.now()}-${i}`;
+      return el("label", { class: "member", for: id }, el("input", { type: "checkbox", id, value: m.full_name }), m.full_name, el("em", {}, `age ${m.age}`));
+    });
+    const node = el("div", { class: "card" }, el("h3", {}, "Also on your account"), boxes,
+      el("button", { class: "btn", type: "button", onclick: () => {
+        const picked = [...node.querySelectorAll("input:checked")].map(i => i.value);
+        send(picked.length ? `Book for ${picked.join(" and ")} too` : "Just me, thanks");
+      } }, "Continue"));
+    return node;
+  }
+  if (card.kind === "booked") {
+    return el("div", { class: "card booked" }, el("h3", {}, "Booked ✓"),
+      el("ul", {}, card.appointments.map(a => el("li", {}, `${a.full_name}: ${a.type}, ${a.label}`))));
+  }
+  if (card.kind === "call911") {
+    return el("div", { class: "card alertcard", role: "alert" }, el("b", {}, "If this is happening now, call 911"),
+      "Trouble breathing or swallowing, swelling spreading to your face or neck, or bleeding that won't stop needs emergency care right away. Our team has also been alerted.");
+  }
+  if (card.kind === "alert") {
+    return el("div", { class: "card alertcard", role: "status" }, el("b", {}, "Our team has been alerted"),
+      "They have your details and will contact you during office hours (Mon–Sat 8am–6pm). If swelling affects your breathing or swallowing, call 911 now.");
+  }
+  return null;
+}
+
+function step(state, num, title, detail) {
+  return el("div", { class: "step" + (state === "pending" ? " pending" : "") },
+    el("span", { class: "tick " + (state === "done" ? "done" : state === "alarm" ? "alarm" : "") }, state === "done" ? "✓" : state === "alarm" ? "!" : String(num)),
+    el("div", {}, el("b", {}, title), el("span", {}, detail)));
+}
+
+function renderSummary(s) {
+  const steps = $("#steps"); steps.innerHTML = "";
+  const main = s.patients.filter(p => p.role !== "family").map(p => p.full_name);
+  const family = s.patients.filter(p => p.role === "family").map(p => `${p.full_name.split(" ")[0]} (${p.age})`);
+  const isNew = s.patients.some(p => p.role === "new");
+  steps.append(main.length
+    ? step("done", 1, isNew ? "You're registered" : "Identity confirmed", main.join(", "))
+    : step("pending", 1, "Confirm who you are", "Your name and date of birth"));
+  if (family.length) steps.append(step("done", 2, "Family on file", family.join(" · ")));
+  const done = s.done.map(d => d.action === "Booked" ? `${d.who}: ${d.type}, ${d.when}` : d.action === "Moved" ? `Moved to ${d.when}` : `Cancelled ${d.when}`);
+  steps.append(step(done.length ? "done" : "pending", family.length ? 3 : 2, done.length ? "Appointment" : "Choose a time", done.length ? done.join("\n") : "We'll show open times to pick from"));
+  if (s.staff_alerted) steps.append(step("alarm", 0, "Staff alerted", "The front desk has been notified"));
+}
+
+form.addEventListener("submit", e => { e.preventDefault(); const t = input.value; input.value = ""; send(t); });
+$("#newchat").addEventListener("click", () => { conversationId = newId(); greet(); $("#rate").hidden = false; resetRate(); input.focus(); });
+$("#bigtext").addEventListener("click", e => { const on = document.documentElement.classList.toggle("large"); e.currentTarget.setAttribute("aria-pressed", on); });
+
+function resetRate() {
+  $("#rate").innerHTML = '<span>How was this chat?</span><div class="row"><button class="ghost" type="button" data-rating="1">👍 Helpful</button><button class="ghost" type="button" data-rating="-1">👎 Not helpful</button></div>';
+}
+$("#rate").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.rating) {
+    const rating = Number(b.dataset.rating);
+    await postFeedback(rating);
+    const box = $("#rate");
+    box.innerHTML = "";
+    box.append(el("span", {}, rating > 0 ? "Thanks for the feedback!" : "Sorry about that. What went wrong? (optional)"));
+    if (rating < 0) {
+      const ta = el("textarea", { id: "fbtext", rows: "3", "aria-label": "What went wrong" });
+      box.append(ta, el("button", { class: "btn", type: "button", "data-send": "1" }, "Send"));
+    }
+  } else if (b.dataset.send) {
+    await postFeedback(-1, $("#fbtext").value);
+    $("#rate").innerHTML = "<span>Thanks, our team will read this.</span>";
+  }
+});
+async function postFeedback(rating, comment) {
+  try { await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ conversation_id: conversationId, rating, comment: comment || null }) }); } catch {}
+}
+
+greet();
+input.focus();
+</script>
+</body>
+</html>
